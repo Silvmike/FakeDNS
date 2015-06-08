@@ -18,4 +18,4 @@ Registrator is an application used to register host with provided hostname.
 
 [http://www.freesoft.org/CIE/Topics/78.htm](http://www.freesoft.org/CIE/Topics/78.htm)
 
-[https://technet.microsoft.com/en-us/library/cc772774(v=ws.10).aspx](Microsoft TechNet 'How DNS Works')
+[Microsoft TechNet 'How DNS Works'](https://technet.microsoft.com/en-us/library/cc772774(v=ws.10).aspx)

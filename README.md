@@ -24,7 +24,7 @@ P.S. You can easily check it:
  dig @localhost myfake.host.org
 ```
 
-## Client
+## Java Client
 
  Connects to specified registrator running on specified host and listening to specified port, and registering this host (that running client) with specified hostname.
 
@@ -38,7 +38,21 @@ Example:
  java -jar fakedns-client-1.0-SNAPSHOT.jar localhost 8099 myfake.host.org
 ```
 
+## Bash Client
 
+ Connects to specified registrator running on specified host and listening to specified port, and registering this host (that running client) with specified hostname.
+
+### Usage
+
+* sh **fakedns-client.sh** &lt;hostname of registrator&gt; &lt;registrator port&gt; &lt;your fake hostname&gt;
+
+Example:
+
+```
+ sh fakedns-client.sh localhost 8099 myfake.host.org
+```
+
+P.S. **netcat** is required.
 
 ## Used links
 

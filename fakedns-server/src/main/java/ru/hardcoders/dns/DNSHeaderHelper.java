@@ -79,7 +79,7 @@ public class DNSHeaderHelper {
 
     public void setResponse(boolean isResponse) {
         int value = isResponse ? FIRST_BIT_MASK : 0; // 0x80 = 1000 0000
-        this.message[FIRST_FLAG_INDEX] = (byte)(((this.message[FIRST_FLAG_INDEX] | FIRST_BIT_MASK) ^ FIRST_BIT_MASK) | FIRST_BIT_MASK);
+        this.message[FIRST_FLAG_INDEX] = (byte)(((this.message[FIRST_FLAG_INDEX] | FIRST_BIT_MASK) ^ FIRST_BIT_MASK) | value);
     }
 
     private void putShort(short value, int pos) {

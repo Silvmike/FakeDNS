@@ -8,9 +8,37 @@ FakeDNS, to use as dynamic dns for Docker containers
 
 Registrator is an application used to register host with provided hostname.
 
+### Usage
+
+* java -jar **fakedns-server-1.0-SNAPSHOT.jar** &lt;hostname to listen: *localhost*, 0.0.0.0, etc.&gt; &lt;registrator port&gt;
+
+Example:
+
+```
+ java -jar fakedns-server-1.0-SNAPSHOT.jar localhost 8099
+```
+
+P.S. You can easily check it:
+
+```
+ dig @localhost myfake.host.org
+```
+
 ## Client
 
  Connects to specified registrator running on specified host and listening to specified port, and registering this host (that running client) with specified hostname.
+
+### Usage
+
+* java -jar **fakedns-client-1.0-SNAPSHOT.jar** &lt;hostname of registrator&gt; &lt;registrator port&gt; &lt;your fake hostname&gt;
+
+Example:
+
+```
+ java -jar fakedns-client-1.0-SNAPSHOT.jar localhost 8099 myfake.host.org
+```
+
+
 
 ## Used links
 

@@ -79,11 +79,7 @@ public class DNSHeaderHelper {
 
     public void setResponse(boolean isResponse) {
         int value = isResponse ? FIRST_BIT_MASK : 0; // 0x80 = 1000 0000
-        System.err.println("Before");
-        System.err.println(Integer.toBinaryString(this.message[FIRST_FLAG_INDEX]));
         this.message[FIRST_FLAG_INDEX] = (byte)(((this.message[FIRST_FLAG_INDEX] | FIRST_BIT_MASK) ^ FIRST_BIT_MASK) | FIRST_BIT_MASK);
-        System.err.println("After");
-        System.err.println(Integer.toBinaryString(this.message[FIRST_FLAG_INDEX]));
     }
 
     private void putShort(short value, int pos) {

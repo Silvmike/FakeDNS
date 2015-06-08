@@ -57,7 +57,7 @@ public class DNSAnswerHelper {
 
                 // set pointer to related question name
                 int pos = this.originalMessage.getEndOfQuestionPosition() + QUESTION_CLASS_PLUS_QUESTION_TYPE_FIELDS + 1;
-                result[pos] = 0xc; // means 1100 0000 (see http://www.zytrax.com/books/dns/ch15/)
+                result[pos] = (byte) 0xc0; // means 1100 0000 (see http://www.zytrax.com/books/dns/ch15/)
                 result[pos + 1] = (byte) DNSMessage.DNS_HEADER_LENGTH; // offset from beginning of the message
                 // set rr type = 1
                 result[pos + 2] = 0;

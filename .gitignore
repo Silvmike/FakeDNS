@@ -2,3 +2,5 @@
 target/
 .idea/
 *.iml
+**/pre_configure.sh
+fakedns-server/docker/server/*.jar

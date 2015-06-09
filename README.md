@@ -1,6 +1,26 @@
 # FakeDNS
 FakeDNS, to use as dynamic dns for Docker containers
 
+FakeDNS is a fake dynamic DNS server. It allows you to dynamically bind hostnames to clients ip addresses.
+Originally, it is created to dynamically resolve hostnames inside Docker container, so there are the following limitations (in current version):
+
+* It knows only about **registred** domain names (it means whose names it was told about)
+* It requires every client to connect to FakeDNS server to register its domain name, or it won't be resolved by FakeDNS
+
+To use it with Docker you should run server somewhere (for example in separate container like in demo below) and run your Docker containers with the following command line argument
+
+```
+ --dns=<IP_ADDRESS_OF_FAKE_DNS_CONTAINER>
+```
+
+You can find details of what this **docker run** command line argument actually means  [here](https://docs.docker.com/articles/networking/).
+
+**Important.** I'd recommend to add Google DNS as well, 'cause FakeDNS knows only about registred domain names.
+
+## Demo
+
+ To run demo you should checkout this repository and follow instructions you can find [here](https://github.com/Silvmike/FakeDNS/tree/master/fakedns-server/docker).
+ 
 ## Server
 
  1. DNS server listens to 53 port on specified host for UDP

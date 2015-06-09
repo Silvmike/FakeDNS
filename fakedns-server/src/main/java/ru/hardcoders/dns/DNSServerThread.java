@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 public class DNSServerThread extends Thread {
 
     private static final int DNS_PORT = 53;
+    private static final int TTL_SECONDS = 5;
     private static final Logger logger = Logger.getLogger(DNSServerThread.class.getName());
 
     private final String hostname;
@@ -32,7 +33,7 @@ public class DNSServerThread extends Thread {
                     DNSAnswerHelper answerHelper = new DNSAnswerHelper(message);
                     if (address != null) {
                         answerHelper.setAddress(address);
-                        answerHelper.setTimeToLiveSeconds(1);
+                        answerHelper.setTimeToLiveSeconds(TTL_SECONDS);
                         answerHelper.setErrorCode(DNSHeaderHelper.ErrorCode.NO_ERROR);
                     } else {
                         answerHelper.setErrorCode(DNSHeaderHelper.ErrorCode.DOMAIN_NOT_FOUND);

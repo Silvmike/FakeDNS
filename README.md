@@ -6,6 +6,7 @@ Originally, it is created to dynamically resolve hostnames inside Docker contain
 
 * It knows only about **registred** domain names (it means whose names it was told about)
 * It requires every client to connect to FakeDNS server to register its domain name, or it won't be resolved by FakeDNS
+* Registred IPtoHostname map doesn't survive FakeDNS restart
 
 To use it with Docker you should run server somewhere (for example in separate container like in demo below) and run your Docker containers with the following command line argument
 

@@ -74,7 +74,7 @@ Example:
 
 P.S. **netcat** is required.
 
-## Used links
+## Used resources
 
 [http://www.zytrax.com/books/dns/ch15/](http://www.zytrax.com/books/dns/ch15/)
 

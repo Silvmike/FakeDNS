@@ -1,3 +1,5 @@
+[![Analytics](https://ga-beacon.appspot.com/UA-73781306-2/FakeDNS)](https://github.com/igrigorik/ga-beacon)
+
 # FakeDNS
 FakeDNS, to use as dynamic dns for Docker containers
 

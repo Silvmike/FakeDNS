@@ -12,13 +12,13 @@ public class Registry {
 
     private static final Map<String, InetAddress> registry = new ConcurrentHashMap<String, InetAddress>();
 
-    private Registry() {}
+    public Registry() {}
 
-    public static void put(String hostname, InetAddress address) {
+    public void put(String hostname, InetAddress address) {
         registry.put(hostname, address);
     }
 
-    public static InetAddress resolve(String hostname) {
+    public InetAddress resolve(String hostname) {
         return registry.get(hostname);
     }
 

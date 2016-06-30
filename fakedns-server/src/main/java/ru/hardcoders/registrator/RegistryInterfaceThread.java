@@ -80,9 +80,7 @@ public class RegistryInterfaceThread extends Thread {
                 InetAddress address = client.getInetAddress();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), "ASCII"));
                 String hostname = reader.readLine();
-                if (hostname != null && hostname.length() > 2) {
-                    registry.put(hostname, address);
-                }
+                registry.put(hostname, address);
             } catch (IOException e) {
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {

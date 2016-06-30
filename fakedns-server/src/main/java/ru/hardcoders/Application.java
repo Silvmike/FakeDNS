@@ -22,11 +22,7 @@ public class Application {
         }
         Args arguments = new Args(args);
         DNSServerThread serverThread = new DNSServerThread(arguments.hostname());
-        RegistryInterfaceThread registryInterfaceThread = new RegistryInterfaceThread(
-                                                                new InetSocketAddress(arguments.hostname(),
-                                                                                      arguments.port()),
-                                                                true
-                                                              );
+        RegistryInterfaceThread registryInterfaceThread = new RegistryInterfaceThread(arguments.bindAddress(), true);
         new Application(serverThread, registryInterfaceThread).run();
     }
 
@@ -44,11 +40,15 @@ public class Application {
             System.arraycopy(args, 0, this.args, 0, this.args.length);
         }
 
+        public InetSocketAddress bindAddress() {
+            return new InetSocketAddress(hostname(), port());
+        }
+
         public String hostname() {
             return args[0];
         }
 
-        public int port() {
+        private int port() {
             return Integer.parseInt(args[1]);
         }
     }

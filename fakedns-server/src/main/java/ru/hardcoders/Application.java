@@ -1,18 +1,18 @@
 package ru.hardcoders;
 
 import ru.hardcoders.dns.DNSServerThread;
-import ru.hardcoders.registrator.RegistratorThread;
+import ru.hardcoders.registrator.RegistryInterfaceThread;
 
 import java.net.InetSocketAddress;
 
 public class Application {
 
     private final DNSServerThread serverThread;
-    private final RegistratorThread registratorThread;
+    private final RegistryInterfaceThread registryInterfaceThread;
 
-    public Application(DNSServerThread serverThread, RegistratorThread registratorThread) {
+    public Application(DNSServerThread serverThread, RegistryInterfaceThread registryInterfaceThread) {
         this.serverThread = serverThread;
-        this.registratorThread = registratorThread;
+        this.registryInterfaceThread = registryInterfaceThread;
     }
 
     public static void main(String[] args) {
@@ -22,17 +22,17 @@ public class Application {
         }
         Args arguments = new Args(args);
         DNSServerThread serverThread = new DNSServerThread(arguments.hostname());
-        RegistratorThread registratorThread = new RegistratorThread(
-                                                    new InetSocketAddress(arguments.hostname(),
-                                                                          arguments.port()),
-                                                    true
-                                                  );
-        new Application(serverThread, registratorThread).run();
+        RegistryInterfaceThread registryInterfaceThread = new RegistryInterfaceThread(
+                                                                new InetSocketAddress(arguments.hostname(),
+                                                                                      arguments.port()),
+                                                                true
+                                                              );
+        new Application(serverThread, registryInterfaceThread).run();
     }
 
     public void run() {
         serverThread.start();
-        registratorThread.start();
+        registryInterfaceThread.start();
     }
 
     private static final class Args {

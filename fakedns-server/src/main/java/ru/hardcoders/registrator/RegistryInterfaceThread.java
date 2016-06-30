@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 /**
  * Created by root on 08.06.15.
  */
-public class RegistratorThread extends Thread {
+public class RegistryInterfaceThread extends Thread {
 
-    private static final Logger logger = Logger.getLogger(RegistratorThread.class.getName());
+    private static final Logger logger = Logger.getLogger(RegistryInterfaceThread.class.getName());
 
     private static final int SO_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(25L);
     private final ExecutorService executor = Executors.newFixedThreadPool(20 /* just 1st came to head */);
@@ -28,11 +28,11 @@ public class RegistratorThread extends Thread {
     private final InetSocketAddress address;
     private final Registry registry;
 
-    public RegistratorThread(InetSocketAddress address, boolean daemon) {
+    public RegistryInterfaceThread(InetSocketAddress address, boolean daemon) {
         this(new Registry(), address, daemon);
     }
 
-    public RegistratorThread(Registry registry, InetSocketAddress address, boolean daemon) {
+    public RegistryInterfaceThread(Registry registry, InetSocketAddress address, boolean daemon) {
         this.registry = registry;
         this.address = address;
         setDaemon(daemon);

@@ -198,7 +198,7 @@ public class CompressedResponse {
         private final char type;
 
         public Type(int type) {
-            this((char) type); //???????????
+            this((char) type);
         }
 
         public Type(char type) {

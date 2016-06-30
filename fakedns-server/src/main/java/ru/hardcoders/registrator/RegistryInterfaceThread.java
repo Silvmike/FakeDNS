@@ -23,18 +23,29 @@ public class RegistryInterfaceThread extends Thread {
     private static final Logger logger = Logger.getLogger(RegistryInterfaceThread.class.getName());
 
     private static final int SO_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(25L);
-    private final ExecutorService executor = Executors.newFixedThreadPool(20 /* just 1st came to head */);
 
+    private final ExecutorService executor;
     private final InetSocketAddress address;
     private final Registry registry;
+    private final int timeout;
 
     public RegistryInterfaceThread(InetSocketAddress address, boolean daemon) {
-        this(new Registry(), address, daemon);
+        this(address, daemon, SO_TIMEOUT);
     }
 
-    public RegistryInterfaceThread(Registry registry, InetSocketAddress address, boolean daemon) {
+    public RegistryInterfaceThread(InetSocketAddress address, boolean daemon, int timeout) {
+        this(Executors.newFixedThreadPool(20), address, daemon, timeout);
+    }
+
+    public RegistryInterfaceThread(ExecutorService executor, InetSocketAddress address, boolean daemon, int timeout) {
+        this(executor, new Registry(), address, daemon, timeout);
+    }
+
+    public RegistryInterfaceThread(ExecutorService executor, Registry registry, InetSocketAddress address, boolean daemon, int timeout) {
+        this.executor = executor;
         this.registry = registry;
         this.address = address;
+        this.timeout = timeout;
         setDaemon(daemon);
     }
 
@@ -44,6 +55,7 @@ public class RegistryInterfaceThread extends Thread {
             ServerSocket socket = new ServerSocket(address.getPort(), 50, address.getAddress());
             while (!Thread.currentThread().isInterrupted()) {
                 Socket client = socket.accept();
+                client.setSoTimeout(timeout);
                 executor.submit(new RegistrationWorker(registry, client));
             }
         } catch (IOException e) {
@@ -66,7 +78,6 @@ public class RegistryInterfaceThread extends Thread {
         public void run() {
             try {
                 InetAddress address = client.getInetAddress();
-                client.setSoTimeout(SO_TIMEOUT);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), "ASCII"));
                 String hostname = reader.readLine();
                 if (hostname != null && hostname.length() > 2) {

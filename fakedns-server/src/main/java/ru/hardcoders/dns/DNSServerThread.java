@@ -21,15 +21,30 @@ public class DNSServerThread extends Thread {
     private static final Logger logger = Logger.getLogger(DNSServerThread.class.getName());
 
     private final String hostname;
-    private final DNS dns = new DNS(new CompressedResponse.TimeToLive(TTL_SECONDS));
+    private final DNS dns;
+    private final int port;
 
     public DNSServerThread(String hostname) {
+        this(hostname, new CompressedResponse.TimeToLive(TTL_SECONDS));
+    }
+
+    public DNSServerThread(String hostname, CompressedResponse.TimeToLive ttl) {
+        this(hostname, ttl, DNS_PORT);
+    }
+
+    public DNSServerThread(String hostname, CompressedResponse.TimeToLive ttl, int port) {
+        this(new DNS(ttl), hostname, port);
+    }
+
+    public DNSServerThread(DNS dns, String hostname, int port) {
+        this.dns = dns;
         this.hostname = hostname;
+        this.port = port;
     }
 
     @Override
     public void run() {
-        try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(hostname, DNS_PORT))) {
+        try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(hostname, port))) {
 
             while (!Thread.currentThread().isInterrupted()) {
                 DatagramPacket packet = new DatagramPacket(new byte[512], 512);

@@ -17,21 +17,66 @@ public class Application {
             System.err.println("You MUST specify 3 args: destination hostname and destination port, and your 'fake' hostname.");
             System.exit(-2);
         }
-        String hostname = args[0];
-        int port = Integer.parseInt(args[1]);
-        String fakeHostname = args[2];
-
-        Socket socket = new Socket();
         try {
-            socket.connect(new InetSocketAddress(hostname, port));
-            Writer writer = new PrintWriter(socket.getOutputStream());
-            writer.write(fakeHostname + "\n");
-            writer.flush();
-            socket.close();
+            RegisterRequest request = new RegisterRequest(new Args(args));
+            request.send();
             System.out.println("OK");
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             System.exit(-1);
         }
+    }
+
+    private static final class RegisterRequest {
+
+        private final String registrant;
+        private final InetSocketAddress address;
+
+        public RegisterRequest(Args args) {
+            this.registrant = args.registrant();
+            this.address = args.address();
+        }
+
+        public RegisterRequest(String registrant, InetSocketAddress address) {
+            this.registrant = registrant;
+            this.address = address;
+        }
+
+        public void send() throws IOException {
+            Socket socket = new Socket();
+            socket.connect(address);
+            Writer writer = new PrintWriter(socket.getOutputStream());
+            writer.write(registrant);
+            writer.write("\n");
+            writer.flush();
+            socket.close();
+        }
+    }
+
+    private static final class Args {
+
+        private final String[] args;
+
+        public Args(String[] args) {
+            this.args = new String[args.length];
+            System.arraycopy(args, 0, this.args, 0, this.args.length);
+        }
+
+        public String registrant() {
+            return args[2];
+        }
+
+        public InetSocketAddress address() {
+            return new InetSocketAddress(hostname(), port());
+        }
+
+        private String hostname() {
+            return args[0];
+        }
+
+        private int port() {
+            return Integer.parseInt(args[1]);
+        }
+
     }
 }

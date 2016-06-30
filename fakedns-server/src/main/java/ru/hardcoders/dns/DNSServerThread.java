@@ -53,7 +53,10 @@ public class DNSServerThread extends Thread {
                     byte[] response = dns.response(new QueryMessage(packet.getData())).toBytes();
                     packet.setData(response);
                     socket.send(packet);
-                } catch (IOException e) {
+                } catch (Exception e) {
+                    if (e instanceof SocketException) {
+                        throw (SocketException)e;
+                    }
                     logger.log(Level.WARNING, e.getMessage(), e);
                 }
             }

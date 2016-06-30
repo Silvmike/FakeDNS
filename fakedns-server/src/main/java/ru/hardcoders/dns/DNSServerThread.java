@@ -1,7 +1,13 @@
 package ru.hardcoders.dns;
 
+import ru.hardcoders.dns.transport.CompressedResponse;
+import ru.hardcoders.dns.transport.QueryMessage;
+
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +21,7 @@ public class DNSServerThread extends Thread {
     private static final Logger logger = Logger.getLogger(DNSServerThread.class.getName());
 
     private final String hostname;
+    private final DNS dns = new DNS(new CompressedResponse.TimeToLive(TTL_SECONDS));
 
     public DNSServerThread(String hostname) {
         this.hostname = hostname;
@@ -22,24 +29,14 @@ public class DNSServerThread extends Thread {
 
     @Override
     public void run() {
-        DatagramPacket packet = new DatagramPacket(new byte[512], 512);
         try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(hostname, DNS_PORT))) {
 
             while (!Thread.currentThread().isInterrupted()) {
+                DatagramPacket packet = new DatagramPacket(new byte[512], 512);
                 try {
                     socket.receive(packet);
-                    DNSMessage message = new DNSMessage(packet.getData());
-                    InetAddress address = Registry.resolve(message.getQuestionName());
-                    DNSAnswerHelper answerHelper = new DNSAnswerHelper(message);
-                    if (address != null) {
-                        answerHelper.setAddress(address);
-                        answerHelper.setTimeToLiveSeconds(TTL_SECONDS);
-                        answerHelper.setErrorCode(DNSHeaderHelper.ErrorCode.NO_ERROR);
-                    } else {
-                        answerHelper.setErrorCode(DNSHeaderHelper.ErrorCode.DOMAIN_NOT_FOUND);
-                    }
-                    byte[] answer = answerHelper.build();
-                    packet.setData(answer);
+                    byte[] response = dns.response(new QueryMessage(packet.getData())).toBytes();
+                    packet.setData(response);
                     socket.send(packet);
                 } catch (IOException e) {
                     logger.log(Level.WARNING, e.getMessage(), e);

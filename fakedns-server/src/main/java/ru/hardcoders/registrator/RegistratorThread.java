@@ -26,7 +26,6 @@ public class RegistratorThread extends Thread {
     private final ExecutorService executor = Executors.newFixedThreadPool(20 /* just 1st came to head */);
 
     private final InetSocketAddress address;
-    private String hostname;
 
     public RegistratorThread(InetSocketAddress address) {
         this.address = address;
@@ -46,7 +45,7 @@ public class RegistratorThread extends Thread {
         }
     }
 
-    private static class RegistrationWorker implements Runnable {
+    private static final class RegistrationWorker implements Runnable {
 
         private final Socket client;
 

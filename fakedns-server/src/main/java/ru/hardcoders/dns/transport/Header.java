@@ -21,7 +21,6 @@ public class Header {
         return new Header(header);
     }
 
-
     public Header withFlagsAndCodes(FlagsAndCodes flagsAndCodes) {
         char[] header = this.toChar();
         header[1] = flagsAndCodes.toChar();
@@ -165,22 +164,6 @@ public class Header {
         public byte toByte() {
             return this.responseCode;
         }
-    }
-
-    private static final class FilledHeader extends Header {
-
-        public FilledHeader(char value) {
-            super(filled(value));
-        }
-
-        private static char[] filled(char value) {
-            char[] result = new char[6];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = value;
-            }
-            return result;
-        }
-
     }
 
     public static final class BytesHeader extends Header {

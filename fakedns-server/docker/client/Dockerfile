@@ -1,10 +1,8 @@
-FROM phusion/baseimage
+FROM alpine:3.5
 MAINTAINER Mike S. <silvanovich.michael@gmail.com>
-ADD pre_configure.sh /tmp/pre_configure.sh
-RUN sh /tmp/pre_configure.sh && rm /tmp/pre_configure.sh
-RUN apt-get update && apt-get --assume-yes install dnsutils iputils-ping netcat
-RUN mkdir -p /etc/my_init.d && mkdir -p /var/fakedns-client
+RUN apk add --update netcat-openbsd bind-tools bash
+RUN ln -s /usr/bin/nc /usr/bin/netcat
+RUN mkdir -p /var/fakedns-client
 ADD fakedns-client.sh /var/fakedns-client/fakedns-client.sh
-ADD fakedns-register.sh /etc/my_init.d/fakedns-register.sh
-RUN chmod 775 /etc/my_init.d/fakedns-register.sh
-RUN touch /etc/apt/apt.conf.d/01proxy && rm /etc/apt/apt.conf.d/01proxy
+ADD entry.sh /var/fakedns-client/entry.sh
+CMD /bin/sh /var/fakedns-client/entry.sh

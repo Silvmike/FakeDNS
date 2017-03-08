@@ -35,5 +35,5 @@
  ```
  
  * It will run Docker image **silvmike/fakedns-client** 3 times, so you will have 3 separate containers with different IPs and hostnames.
- Hostnames are: **client1.hardocders.ru**, **client2.hardocders.ru**, **client3.hardocders.ru**. 
+ Hostnames are: **client1.hardcoders.ru**, **client2.hardcoders.ru**, **client3.hardcoders.ru**. 
  Here you can connect to any of client containers and try to ping other containers.

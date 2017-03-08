@@ -4,6 +4,7 @@ import ru.hardcoders.dns.DNSServerThread;
 import ru.hardcoders.registrator.RegistryInterfaceThread;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 
 public class Application {
 
@@ -36,8 +37,7 @@ public class Application {
         private final String[] args;
 
         public Args(String[] args) {
-            this.args = new String[args.length];
-            System.arraycopy(args, 0, this.args, 0, this.args.length);
+            this.args = Arrays.copyOf(args, args.length);
         }
 
         public InetSocketAddress bindAddress() {

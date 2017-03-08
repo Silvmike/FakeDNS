@@ -1,6 +1,7 @@
 package ru.hardcoders.dns.transport;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 
 /**
  * Created by silvmike on 30.06.16.
@@ -21,26 +22,24 @@ public class CompressedResponse {
 
     public CompressedResponse withHeader(Header dnsHeader) {
         byte[] header = dnsHeader.toBytes();
-        byte[] message = new byte[this.message.length];
-        System.arraycopy(this.message, 0, message, 0, message.length);
+        byte[] message = Arrays.copyOf(this.message, this.message.length);
         System.arraycopy(header, 0, message, 0, header.length);
         return new CompressedResponse(message);
     }
 
     public CompressedResponse withAnswer(CompressedAnswer compressedAnswer) {
-        byte[] answer = compressedAnswer.toByte();
         int endOfMessage = endOfQuestion() + 4;
-        byte[] message = new byte[endOfMessage + answer.length + 1];
-        System.arraycopy(this.message, 0, message, 0, endOfMessage + 1);
+        byte[] answer = compressedAnswer.toBytes();
+        byte[] message = Arrays.copyOf(this.message, endOfMessage + answer.length + 1);
         System.arraycopy(answer, 0, message, endOfMessage + 1, answer.length);
         return new CompressedResponse(message);
     }
 
     public CompressedResponse withNoAnswer() {
         int endOfMessage = endOfQuestion() + 1;
-        byte[] message = new byte[endOfMessage];
-        System.arraycopy(this.message, 0, message, 0, endOfMessage);
-        return new CompressedResponse(message);
+        return new CompressedResponse(
+            Arrays.copyOf(this.message, endOfMessage)
+        );
     }
 
     private int endOfQuestion() {
@@ -54,9 +53,7 @@ public class CompressedResponse {
     }
 
     public byte[] toBytes() {
-        byte[] message = new byte[this.message.length];
-        System.arraycopy(this.message, 0, message, 0, message.length);
-        return message;
+        return Arrays.copyOf(this.message, this.message.length);
     }
 
     public enum ErrorCode {
@@ -80,7 +77,7 @@ public class CompressedResponse {
         }
     }
 
-    public static class CompressedAnswer {
+    public static class CompressedAnswer implements CharArraySerializable {
 
         private final char[] answer;
 
@@ -93,58 +90,40 @@ public class CompressedResponse {
         }
 
         public CompressedAnswer withNamePointer(NamePointer namePointer) {
-            char[] answer = new char[this.answer.length];
-            char[] pointer = namePointer.toChar();
-            if (answer.length < pointer.length) {
-                answer = new char[pointer.length];
-            }
-            System.arraycopy(this.answer, 0, answer, 0, this.answer.length);
-            System.arraycopy(pointer, 0, answer, 0, pointer.length);
-            return new CompressedAnswer(answer);
+            return new CompressedAnswer(
+                applyPositionAware(namePointer)
+            );
         }
 
         public CompressedAnswer withType(Type answerType) {
-            char[] answer = new char[this.answer.length];
-            char[] type = answerType.toChar();
-            if (answer.length < type.length + 1) {
-                answer = new char[type.length + 1];
-            }
-            System.arraycopy(this.answer, 0, answer, 0, this.answer.length);
-            System.arraycopy(type, 0, answer, 1, type.length);
-            return new CompressedAnswer(answer);
+            return new CompressedAnswer(
+                applyPositionAware(answerType)
+            );
         }
 
         public CompressedAnswer withClass(AnswerClass answerClass) {
-            char[] answer = new char[this.answer.length];
-            char[] clazz = answerClass.toChar();
-            if (answer.length < clazz.length + 2) {
-                answer = new char[clazz.length + 2];
-            }
-            System.arraycopy(this.answer, 0, answer, 0, this.answer.length);
-            System.arraycopy(clazz, 0, answer, 2, clazz.length);
-            return new CompressedAnswer(answer);
+            return new CompressedAnswer(
+                applyPositionAware(answerClass)
+            );
         }
 
         public CompressedAnswer withTTL(TimeToLive timeToLive) {
-            char[] answer = new char[this.answer.length];
-            char[] ttl = timeToLive.toChar();
-            if (answer.length < ttl.length + 3) {
-                answer = new char[ttl.length + 3];
-            }
-            System.arraycopy(this.answer, 0, answer, 0, this.answer.length);
-            System.arraycopy(ttl, 0, answer, 3, ttl.length);
-            return new CompressedAnswer(answer);
+            return new CompressedAnswer(
+                applyPositionAware(timeToLive)
+            );
         }
 
         public CompressedAnswer withData(Data resourceData) {
-            char[] answer = new char[this.answer.length];
-            char[] data = resourceData.toChar();
-            if (answer.length < data.length + 5) {
-                answer = new char[data.length + 5];
-            }
-            System.arraycopy(this.answer, 0, answer, 0, this.answer.length);
-            System.arraycopy(data, 0, answer, 5, data.length);
-            return new CompressedAnswer(answer);
+            return new CompressedAnswer(
+                applyPositionAware(resourceData)
+            );
+        }
+
+        private char[] applyPositionAware(CharArraySerializablePositionAware field) {
+            char[] serialized = field.toChar();
+            char[] answer = Arrays.copyOf(this.answer, Math.max(this.answer.length, serialized.length + field.pos()));
+            System.arraycopy(serialized, 0, answer, field.pos(), serialized.length);
+            return answer;
         }
 
         public char[] toChar() {
@@ -153,7 +132,7 @@ public class CompressedResponse {
             return result;
         }
 
-        public byte[] toByte() {
+        public byte[] toBytes() {
             byte[] result = new byte[answer.length * 2];
             for (int i = 0; i < answer.length; i++) {
                 result[2 * i] = (byte) ((answer[i] >> 8) & 0xff);
@@ -164,7 +143,7 @@ public class CompressedResponse {
 
     }
 
-    public static final class NamePointer {
+    public static final class NamePointer implements CharArraySerializablePositionAware {
 
         private final char[] pointer;
 
@@ -176,6 +155,11 @@ public class CompressedResponse {
             char[] data = new char[this.pointer.length];
             System.arraycopy(this.pointer, 0, data, 0, data.length);
             return data;
+        }
+
+        @Override
+        public int pos() {
+            return 0;
         }
     }
 
@@ -193,7 +177,7 @@ public class CompressedResponse {
         }
     }
 
-    public static class Type {
+    public static class Type implements CharArraySerializablePositionAware {
 
         private final char type;
 
@@ -208,9 +192,14 @@ public class CompressedResponse {
         public char[] toChar() {
             return new char[]{this.type};
         }
+
+        @Override
+        public int pos() {
+            return 1;
+        }
     }
 
-    public static class AnswerClass {
+    public static class AnswerClass implements CharArraySerializablePositionAware {
 
         private final char answerClass;
 
@@ -225,9 +214,14 @@ public class CompressedResponse {
         public char[] toChar() {
             return new char[]{this.answerClass};
         }
+
+        @Override
+        public int pos() {
+            return 2;
+        }
     }
 
-    public static class TimeToLive {
+    public static class TimeToLive implements CharArraySerializablePositionAware {
 
         private final int ttl;
 
@@ -255,9 +249,13 @@ public class CompressedResponse {
             return result;
         }
 
+        @Override
+        public int pos() {
+            return 3;
+        }
     }
 
-    public static final class Data {
+    public static final class Data implements CharArraySerializablePositionAware {
 
         private final char[] data;
 
@@ -276,6 +274,19 @@ public class CompressedResponse {
             return data;
         }
 
+        public int pos() {
+            return 5;
+        }
     }
+
+    interface PositionAware {
+        int pos();
+    }
+
+    interface CharArraySerializable {
+        char[] toChar();
+    }
+
+    interface CharArraySerializablePositionAware extends PositionAware, CharArraySerializable {}
 
 }

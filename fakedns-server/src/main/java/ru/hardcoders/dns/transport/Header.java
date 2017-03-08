@@ -1,5 +1,7 @@
 package ru.hardcoders.dns.transport;
 
+import java.util.Arrays;
+
 /**
  * Created by silvmike on 29.06.16.
  */
@@ -56,9 +58,7 @@ public class Header {
     }
 
     public char[] toChar() {
-        char[] result = new char[header.length];
-        System.arraycopy(header, 0, result, 0, header.length);
-        return result;
+        return Arrays.copyOf(header, header.length);
     }
 
     public byte[] toBytes() {

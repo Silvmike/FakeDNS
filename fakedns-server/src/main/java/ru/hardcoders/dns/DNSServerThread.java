@@ -3,7 +3,6 @@ package ru.hardcoders.dns;
 import ru.hardcoders.dns.transport.CompressedResponse;
 import ru.hardcoders.dns.transport.QueryMessage;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;

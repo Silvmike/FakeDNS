@@ -1,6 +1,7 @@
 package ru.hardcoders.dns.transport;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 /**
  * Created by silvmike on 30.06.16.
@@ -13,15 +14,11 @@ public class QueryMessage {
     private final byte[] message;
 
     public QueryMessage(byte[] message) {
-        byte[] result = new byte[message.length];
-        System.arraycopy(message, 0, result, 0, result.length);
-        this.message = result;
+        this.message = Arrays.copyOf(message, message.length);
     }
 
     public Header header() {
-        byte[] header = new byte[DNS_HEADER_LENGTH];
-        System.arraycopy(this.message, 0, header, 0, header.length);
-        return new Header.BytesHeader(header);
+        return new Header.BytesHeader(Arrays.copyOf(this.message, DNS_HEADER_LENGTH));
     }
 
     public String question() {
@@ -58,8 +55,7 @@ public class QueryMessage {
     }
 
     public byte[] toBytes() {
-        byte[] result = new byte[this.message.length];
-        System.arraycopy(this.message, 0, result, 0, result.length);
-        return result;
+        return Arrays.copyOf(this.message, this.message.length);
     }
+
 }

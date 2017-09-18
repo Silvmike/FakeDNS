@@ -2,16 +2,16 @@ package ru.hardcoders.registrator;
 
 import ru.hardcoders.dns.Registry;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,75 +22,108 @@ public class RegistryInterfaceThread extends Thread {
 
     private static final Logger logger = Logger.getLogger(RegistryInterfaceThread.class.getName());
 
-    private static final int SO_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(25L);
-
-    private final ExecutorService executor;
     private final InetSocketAddress address;
     private final Registry registry;
-    private final int timeout;
 
     public RegistryInterfaceThread(InetSocketAddress address, boolean daemon) {
-        this(address, daemon, SO_TIMEOUT);
+        this(new Registry(), address, daemon);
     }
 
-    public RegistryInterfaceThread(InetSocketAddress address, boolean daemon, int timeout) {
-        this(Executors.newFixedThreadPool(20), address, daemon, timeout);
-    }
-
-    public RegistryInterfaceThread(ExecutorService executor, InetSocketAddress address, boolean daemon, int timeout) {
-        this(executor, new Registry(), address, daemon, timeout);
-    }
-
-    public RegistryInterfaceThread(ExecutorService executor, Registry registry, InetSocketAddress address, boolean daemon, int timeout) {
-        this.executor = executor;
+    public RegistryInterfaceThread(Registry registry, InetSocketAddress address, boolean daemon) {
         this.registry = registry;
         this.address = address;
-        this.timeout = timeout;
         setDaemon(daemon);
     }
 
     @Override
     public void run() {
-        try {
-            ServerSocket socket = new ServerSocket(address.getPort(), 50, address.getAddress());
+        try (ServerSocketChannel channel = ServerSocketChannel.open()) {
+
+            channel.configureBlocking(false);
+            channel.bind(address);
+
+            Selector selector = Selector.open();
+            channel.register(selector, SelectionKey.OP_ACCEPT);
+
             while (!Thread.currentThread().isInterrupted()) {
-                Socket client = socket.accept();
-                client.setSoTimeout(timeout);
-                executor.submit(new RegistrationWorker(registry, client));
+                if (selector.select() > 0) {
+                    for (Iterator<SelectionKey> iterator = selector.selectedKeys().iterator(); iterator.hasNext(); ) {
+                        SelectionKey selectionKey = iterator.next();
+                        iterator.remove();
+                        if (selectionKey.isAcceptable()) {
+                            acceptClient(selectionKey);
+                        } else {
+                            ((Handler) selectionKey.attachment()).handle(selectionKey);
+                        }
+                    }
+                }
             }
+
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             System.exit(-1);
         }
     }
 
-    private static final class RegistrationWorker implements Runnable {
+    private void acceptClient(SelectionKey selectionKey) {
+        try {
+            SocketChannel socketChannel = ((ServerSocketChannel) selectionKey.channel()).accept();
+            socketChannel.configureBlocking(false);
+            SelectionKey clientSelectionKey = socketChannel.register(selectionKey.selector(), SelectionKey.OP_READ);
+            clientSelectionKey.attach(new Handler(socketChannel, registry));
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
 
-        private final Socket client;
+    private static final class Handler {
+
+        private static final Charset ASCII = Charset.forName("ASCII");
+        private static final int FQDN_MAX_LENGTH = 255;
+
+        private final ByteBuffer buffer = ByteBuffer.allocate(FQDN_MAX_LENGTH);
+        private final SocketChannel channel;
         private final Registry registry;
 
-        public RegistrationWorker(Registry registry, Socket client) {
+        public Handler(SocketChannel channel, Registry registry) {
+            this.channel = channel;
             this.registry = registry;
-            this.client = client;
         }
 
-        @Override
-        public void run() {
+        public void handle(SelectionKey key) {
             try {
-                InetAddress address = client.getInetAddress();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), "ASCII"));
-                String hostname = reader.readLine();
-                registry.put(hostname, address);
-            } catch (IOException e) {
-                logger.log(Level.WARNING, e.getMessage(), e);
-            } finally {
-                try {
-                    client.close();
-                } catch (IOException e) {
-                    // ignore
+                if (key.isReadable()) {
+                    logger.fine("Start reading");
+                    if (channel.read(buffer) > 0) {
+                        buffer.flip();
+                        if (buffer.get(buffer.limit() - 1) == '\n') {
+
+                            String address = ASCII.decode(buffer).toString();
+                            address = address.substring(0, address.indexOf('\n'));
+                            if (address.length() > 0 && address.charAt(address.length() - 1) == '\r') {
+                                address = address.substring(0, address.length() - 1);
+                            }
+                            InetAddress inetAddress = ((InetSocketAddress) channel.getRemoteAddress()).getAddress();
+                            registry.put(address, inetAddress);
+                            logger.info("Registered " + inetAddress + " as " + address);
+                            key.interestOps(0);
+                            key.cancel();
+                            channel.close();
+
+                        }
+                        buffer.compact();
+                    }
                 }
+            } catch (IOException ioException) {
+                try {
+                    channel.close();
+                } catch (IOException onCloseException) {
+                    ioException.addSuppressed(onCloseException);
+                }
+                logger.log(Level.SEVERE, ioException.getMessage(), ioException);
             }
         }
 
     }
+
 }

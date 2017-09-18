@@ -5,6 +5,7 @@ if [ "$#" -ne 3 ]; then
   exit 
 fi
 
-echo "$3\n" | netcat $1 $2
+echo "$3
+" | netcat $1 $2
 
 echo OK

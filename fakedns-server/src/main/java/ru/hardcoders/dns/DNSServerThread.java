@@ -45,8 +45,10 @@ public class DNSServerThread extends Thread {
     public void run() {
         try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(hostname, port))) {
 
+            byte[] buffer = new byte[512];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             while (!Thread.currentThread().isInterrupted()) {
-                DatagramPacket packet = new DatagramPacket(new byte[512], 512);
+                packet.setData(buffer, 0, buffer.length);
                 try {
                     socket.receive(packet);
                     byte[] response = dns.response(new QueryMessage(packet.getData())).toBytes();

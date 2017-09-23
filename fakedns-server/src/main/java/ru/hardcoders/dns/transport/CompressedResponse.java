@@ -242,10 +242,10 @@ public class CompressedResponse {
 
         public byte[] bytes() {
             byte[] result = new byte[4];
-            result[1] = (byte) ((ttl >> 24) & 0xff);
-            result[2] = (byte) ((ttl >> 16) & 0xff);
-            result[3] = (byte) ((ttl >> 8) & 0xff);
-            result[4] = (byte) ((ttl) & 0xff);
+            result[0] = (byte) ((ttl >> 24) & 0xff);
+            result[1] = (byte) ((ttl >> 16) & 0xff);
+            result[2] = (byte) ((ttl >> 8) & 0xff);
+            result[3] = (byte) ((ttl) & 0xff);
             return result;
         }
 
@@ -263,8 +263,8 @@ public class CompressedResponse {
             char[] data = new char[3];
             byte[] addr = address.getAddress();
             data[0] = 4;
-            data[1] = (char) ((addr[0] << 8) | addr[1]);
-            data[2] = (char) ((addr[2] << 8) | addr[3]);
+            data[1] = (char) ((addr[0] << 8) | (addr[1] & 0xff));
+            data[2] = (char) ((addr[2] << 8) | (addr[3] & 0xff));
             this.data = data;
         }
 

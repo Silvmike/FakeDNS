@@ -3,11 +3,6 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>ru.hardcoders</groupId>
-        <artifactId>fakedns</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
     <groupId>ru.hardcoders</groupId>
     <artifactId>fakedns-client</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -40,6 +35,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
+                    <finalName>fakedns-client</finalName>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>

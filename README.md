@@ -13,7 +13,7 @@ Originally, it is created to dynamically resolve hostnames inside Docker contain
 To use it with Docker you should run server somewhere (for example in separate container like in demo below) and run your Docker containers with the following command line argument
 
 ```
- --dns=<IP_ADDRESS_OF_FAKE_DNS_CONTAINER>
+ --dns=<IP_ADDRESS_OF_FAKE_DNS_CONTAINER> --dns=8.8.8.8 --dns=8.8.4.4
 ```
 
 You can find details of what this **docker run** command line argument actually means  [here](https://docs.docker.com/articles/networking/).
@@ -24,6 +24,26 @@ You can find details of what this **docker run** command line argument actually 
 
  To run demo you should checkout this repository and follow instructions you can find [here](https://github.com/Silvmike/FakeDNS/tree/master/fakedns-server/docker).
  
+## Docker
+
+Image is based on [Alpine](https://alpinelinux.org/) 3.5.
+Binary version of FakeDNS server is built with [GraalVM](https://www.graalvm.org/).
+Final image size is about 20 MB.
+
+### Usage
+
+Run FakeDNS server:
+```
+docker run -d --name=fakedns-server silvmike/fakedns-server:latest
+echo FAKE DNS IS READY ON $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' fakedns-server)
+```
+
+### Building (dev)
+
+```
+cd fakedns-server && docker build -t silvmike/fakedns-server .
+```
+
 ## Server
 
  1. DNS server listens to 53 port on specified host for UDP
@@ -31,7 +51,18 @@ You can find details of what this **docker run** command line argument actually 
 
 Registrator is an application used to register host with provided hostname.
 
-### Usage
+### Building jar
+
+```
+cd fakedns-server && mvn package && cd ..
+```
+
+The result must be here in the end: 
+```
+fakedns-server/target/fakedns-server.jar
+```
+
+### Usage (jar)
 
 * java -jar **fakedns-server-1.0-SNAPSHOT.jar** &lt;hostname to listen: *localhost*, 0.0.0.0, etc.&gt; &lt;registrator port&gt;
 
@@ -50,6 +81,17 @@ P.S. You can easily check it:
 ## Java Client
 
  Connects to specified registrator running on specified host and listening to specified port, and registering this host (that running client) with specified hostname.
+
+### Building jar
+
+```
+cd fakedns-client && mvn package && cd ..
+```
+
+The result must be here in the end: 
+```
+fakedns-client/target/fakedns-client.jar
+```
 
 ### Usage
 

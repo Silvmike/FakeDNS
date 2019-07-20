@@ -64,12 +64,12 @@ fakedns-server/target/fakedns-server.jar
 
 ### Usage (jar)
 
-* java -jar **fakedns-server-1.0-SNAPSHOT.jar** &lt;hostname to listen: *localhost*, 0.0.0.0, etc.&gt; &lt;registrator port&gt;
+* java -jar **fakedns-server.jar** &lt;hostname to listen: *localhost*, 0.0.0.0, etc.&gt; &lt;registrator port&gt;
 
 Example:
 
 ```
- java -jar fakedns-server-1.0-SNAPSHOT.jar localhost 8099
+ java -jar fakedns-server.jar localhost 8099
 ```
 
 P.S. You can easily check it:
@@ -95,12 +95,12 @@ fakedns-client/target/fakedns-client.jar
 
 ### Usage
 
-* java -jar **fakedns-client-1.0-SNAPSHOT.jar** &lt;hostname of registrator&gt; &lt;registrator port&gt; &lt;your fake hostname&gt;
+* java -jar **fakedns-client.jar** &lt;hostname of registrator&gt; &lt;registrator port&gt; &lt;your fake hostname&gt;
 
 Example:
 
 ```
- java -jar fakedns-client-1.0-SNAPSHOT.jar localhost 8099 myfake.host.org
+ java -jar fakedns-client.jar localhost 8099 myfake.host.org
 ```
 
 ## Bash Client

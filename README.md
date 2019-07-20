@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Silvmike/FakeDNS.svg?branch=master)](https://travis-ci.org/Silvmike/FakeDNS)
 [![Analytics](https://ga-beacon.appspot.com/UA-73781306-2/FakeDNS)](https://github.com/igrigorik/ga-beacon)
 
 # FakeDNS
@@ -27,7 +28,9 @@ You can find details of what this **docker run** command line argument actually 
 ## Docker
 
 Image is based on [Alpine](https://alpinelinux.org/) 3.5.
+
 Binary version of FakeDNS server is built with [GraalVM](https://www.graalvm.org/).
+
 Final image size is about 20 MB.
 
 ### Usage

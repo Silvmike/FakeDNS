@@ -45,6 +45,8 @@ public class RegistryInterfaceThread extends Thread {
             Selector selector = Selector.open();
             channel.register(selector, SelectionKey.OP_ACCEPT);
 
+            logger.log(Level.INFO, "Ready to accept new registrations!");
+
             while (!Thread.currentThread().isInterrupted()) {
                 if (selector.select() > 0) {
                     for (Iterator<SelectionKey> iterator = selector.selectedKeys().iterator(); iterator.hasNext(); ) {

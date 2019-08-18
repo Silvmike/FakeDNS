@@ -28,6 +28,13 @@ public class Application {
     }
 
     public void run() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                registryInterfaceThread.close();
+                serverThread.close();
+            }
+        }));
         serverThread.start();
         registryInterfaceThread.start();
     }

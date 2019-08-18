@@ -2,6 +2,7 @@ package ru.hardcoders.registrator;
 
 import ru.hardcoders.dns.Registry;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -18,9 +19,11 @@ import java.util.logging.Logger;
 /**
  * Created by root on 08.06.15.
  */
-public class RegistryInterfaceThread extends Thread {
+public class RegistryInterfaceThread extends Thread implements Closeable {
 
     private static final Logger logger = Logger.getLogger(RegistryInterfaceThread.class.getName());
+
+    private volatile boolean closed = false;
 
     private final InetSocketAddress address;
     private final Registry registry;
@@ -47,7 +50,7 @@ public class RegistryInterfaceThread extends Thread {
 
             logger.log(Level.INFO, "Ready to accept new registrations!");
 
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!closed && !Thread.currentThread().isInterrupted()) {
                 if (selector.select() > 0) {
                     for (Iterator<SelectionKey> iterator = selector.selectedKeys().iterator(); iterator.hasNext(); ) {
                         SelectionKey selectionKey = iterator.next();
@@ -63,7 +66,9 @@ public class RegistryInterfaceThread extends Thread {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            System.exit(-1);
+            if (!closed) {
+                System.exit(-1);
+            }
         }
     }
 
@@ -76,6 +81,12 @@ public class RegistryInterfaceThread extends Thread {
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void close() {
+        this.closed = true;
+        this.interrupt();
     }
 
     private static final class Handler {

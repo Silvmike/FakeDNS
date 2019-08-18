@@ -3,6 +3,7 @@ package ru.hardcoders.dns;
 import ru.hardcoders.dns.transport.CompressedResponse;
 import ru.hardcoders.dns.transport.QueryMessage;
 
+import java.io.Closeable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
@@ -13,11 +14,13 @@ import java.util.logging.Logger;
 /**
  * Created by root on 08.06.15.
  */
-public class DNSServerThread extends Thread {
+public class DNSServerThread extends Thread implements Closeable {
 
     private static final int DNS_PORT = 53;
     private static final int TTL_SECONDS = 5;
     private static final Logger logger = Logger.getLogger(DNSServerThread.class.getName());
+
+    private volatile boolean closed = false;
 
     private final String hostname;
     private final DNS dns;
@@ -47,7 +50,7 @@ public class DNSServerThread extends Thread {
 
             byte[] buffer = new byte[512];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!closed && !Thread.currentThread().isInterrupted()) {
                 packet.setData(buffer, 0, buffer.length);
                 try {
                     socket.receive(packet);
@@ -67,4 +70,9 @@ public class DNSServerThread extends Thread {
         }
     }
 
+    @Override
+    public void close() {
+        this.closed = true;
+        this.interrupt();
+    }
 }

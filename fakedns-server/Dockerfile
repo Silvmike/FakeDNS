@@ -4,7 +4,7 @@ COPY src/ src/
 COPY pom.xml .
 RUN mvn package
 
-FROM oracle/graalvm-ce:19.1.0 as executableBuilder
+FROM ghcr.io/graalvm/graalvm-ce:19.3.5 as executableBuilder
 WORKDIR /tmp/server/target
 RUN gu install native-image
 COPY --from=jarBuilder /tmp/server/target/fakedns-server.jar  .

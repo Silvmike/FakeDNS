@@ -14,10 +14,6 @@ public class DNS {
     private final CompressedResponse.TimeToLive timeToLive;
     private final Registry registry;
 
-    public DNS(CompressedResponse.TimeToLive timeToLive) {
-        this(new Registry(), timeToLive);
-    }
-
     public DNS(Registry registry, CompressedResponse.TimeToLive timeToLive) {
         this.registry = registry;
         this.timeToLive = timeToLive;

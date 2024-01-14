@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by root on 08.06.15.
+ * Created by silvmike on 08.06.15.
  */
 public class Registry {
 
-    private static final Map<String, InetAddress> registry = new ConcurrentHashMap<String, InetAddress>();
+    private final Map<String, InetAddress> registry = new ConcurrentHashMap<String, InetAddress>();
 
     public Registry() {}
 

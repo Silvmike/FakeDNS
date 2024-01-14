@@ -28,10 +28,6 @@ public class RegistryInterfaceThread extends Thread implements Closeable {
     private final InetSocketAddress address;
     private final Registry registry;
 
-    public RegistryInterfaceThread(InetSocketAddress address, boolean daemon) {
-        this(new Registry(), address, daemon);
-    }
-
     public RegistryInterfaceThread(Registry registry, InetSocketAddress address, boolean daemon) {
         this.registry = registry;
         this.address = address;
@@ -113,7 +109,7 @@ public class RegistryInterfaceThread extends Thread implements Closeable {
 
                             String address = ASCII.decode(buffer).toString();
                             address = address.substring(0, address.indexOf('\n'));
-                            if (address.length() > 0 && address.charAt(address.length() - 1) == '\r') {
+                            if (!address.isEmpty() && address.charAt(address.length() - 1) == '\r') {
                                 address = address.substring(0, address.length() - 1);
                             }
                             InetAddress inetAddress = ((InetSocketAddress) channel.getRemoteAddress()).getAddress();

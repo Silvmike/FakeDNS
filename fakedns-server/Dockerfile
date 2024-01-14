@@ -1,12 +1,11 @@
-FROM maven:3-jdk-8-slim as jarBuilder
+FROM maven:3-eclipse-temurin-21-alpine as jarBuilder
 WORKDIR /tmp/server
 COPY src/ src/
 COPY pom.xml .
 RUN mvn package
 
-FROM ghcr.io/graalvm/graalvm-ce:19.3.5 as executableBuilder
+FROM ghcr.io/graalvm/native-image-community:21 as executableBuilder
 WORKDIR /tmp/server/target
-RUN gu install native-image
 COPY --from=jarBuilder /tmp/server/target/fakedns-server.jar  .
 RUN native-image --static -H:+ReportExceptionStackTraces -H:+ReportUnsupportedElementsAtRuntime -jar fakedns-server.jar
 

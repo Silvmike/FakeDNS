@@ -1,6 +1,7 @@
 package ru.hardcoders;
 
 import ru.hardcoders.dns.DNSServerThread;
+import ru.hardcoders.dns.Registry;
 import ru.hardcoders.registrator.RegistryInterfaceThread;
 
 import java.net.InetSocketAddress;
@@ -21,19 +22,19 @@ public class Application {
             System.err.println("You should specify 2 args: hostname to bind and port to listen.");
             System.exit(-2);
         }
-        Args arguments = new Args(args);
-        DNSServerThread serverThread = new DNSServerThread(arguments.hostname());
-        RegistryInterfaceThread registryInterfaceThread = new RegistryInterfaceThread(arguments.bindAddress(), true);
-        new Application(serverThread, registryInterfaceThread).run();
+
+        var arguments = new Args(args);
+        var registry = new Registry();
+        var dnsThread = new DNSServerThread(arguments.hostname(), registry);
+        var registryThread = new RegistryInterfaceThread(registry, arguments.bindAddress(), true);
+
+        new Application(dnsThread, registryThread).run();
     }
 
     public void run() {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                registryInterfaceThread.close();
-                serverThread.close();
-            }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            registryInterfaceThread.close();
+            serverThread.close();
         }));
         serverThread.start();
         registryInterfaceThread.start();

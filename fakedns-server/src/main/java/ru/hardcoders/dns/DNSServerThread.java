@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by root on 08.06.15.
+ * Created by silvmike on 08.06.15.
  */
 public class DNSServerThread extends Thread implements Closeable {
 
@@ -26,16 +26,16 @@ public class DNSServerThread extends Thread implements Closeable {
     private final DNS dns;
     private final int port;
 
-    public DNSServerThread(String hostname) {
-        this(hostname, new CompressedResponse.TimeToLive(TTL_SECONDS));
+    public DNSServerThread(String hostname, Registry registry) {
+        this(hostname, registry, new CompressedResponse.TimeToLive(TTL_SECONDS));
     }
 
-    public DNSServerThread(String hostname, CompressedResponse.TimeToLive ttl) {
-        this(hostname, ttl, DNS_PORT);
+    public DNSServerThread(String hostname, Registry registry, CompressedResponse.TimeToLive ttl) {
+        this(hostname, registry, ttl, DNS_PORT);
     }
 
-    public DNSServerThread(String hostname, CompressedResponse.TimeToLive ttl, int port) {
-        this(new DNS(ttl), hostname, port);
+    public DNSServerThread(String hostname, Registry registry, CompressedResponse.TimeToLive ttl, int port) {
+        this(new DNS(registry, ttl), hostname, port);
     }
 
     public DNSServerThread(DNS dns, String hostname, int port) {
@@ -48,9 +48,11 @@ public class DNSServerThread extends Thread implements Closeable {
     public void run() {
         try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(hostname, port))) {
 
-            byte[] buffer = new byte[512];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            var buffer = new byte[512];
+            var packet = new DatagramPacket(buffer, buffer.length);
+
             while (!closed && !Thread.currentThread().isInterrupted()) {
+
                 packet.setData(buffer, 0, buffer.length);
                 try {
                     socket.receive(packet);
@@ -58,9 +60,7 @@ public class DNSServerThread extends Thread implements Closeable {
                     packet.setData(response);
                     socket.send(packet);
                 } catch (Exception e) {
-                    if (e instanceof SocketException) {
-                        throw (SocketException)e;
-                    }
+                    if (e instanceof SocketException se) throw se;
                     logger.log(Level.WARNING, e.getMessage(), e);
                 }
             }

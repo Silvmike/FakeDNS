@@ -41,7 +41,7 @@ public class QueryMessage {
             for (int i = start; i < (end - 1); ) {
                 char count = (char) message[i];
                 byte[] string = new byte[count];
-                for (int j = 0; j < count; j++) {
+                for (char j = 0; j < count; j++) {
                     string[j] = message[i + j + 1];
                 }
                 buffer.append(new String(string, "ASCII")).append('.');
@@ -49,7 +49,7 @@ public class QueryMessage {
             }
             buffer.setLength(buffer.length() - 1);
         } catch (UnsupportedEncodingException e) {
-            // just ignore
+            throw new RuntimeException(e);
         }
         return buffer.toString();
     }

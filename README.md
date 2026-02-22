@@ -27,17 +27,17 @@ You can find details of what this **docker run** command line argument actually 
  
 ## Docker
 
-Image is based on [Alpine](https://alpinelinux.org/) 3.5.
-
+Image is completely distro-less. 
+Inspired with https://www.graalvm.org/jdk20/reference-manual/native-image/guides/build-static-executables/ .
 Binary version of FakeDNS server is built with [GraalVM](https://www.graalvm.org/).
 
-Final image size is about 20 MB.
+Final image size is about 7 MB.
 
 ### Usage
 
 Run FakeDNS server:
 ```
-docker run -d --name=fakedns-server silvmike/fakedns-server:latest
+docker run -d --name=fakedns-server silvmike/fakedns-server:latest 0.0.0.0 8099
 echo FAKE DNS IS READY ON $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' fakedns-server)
 ```
 

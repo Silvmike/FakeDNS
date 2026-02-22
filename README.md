@@ -28,8 +28,11 @@ You can find details of what this **docker run** command line argument actually 
 ## Docker
 
 Image is completely distro-less. 
+
 Inspired with https://www.graalvm.org/jdk20/reference-manual/native-image/guides/build-static-executables/ .
+
 Binary version of FakeDNS server is built with [GraalVM](https://www.graalvm.org/).
+
 
 Final image size is about 7 MB.
 

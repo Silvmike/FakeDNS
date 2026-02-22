@@ -1,7 +1,7 @@
 package ru.hardcoders.dns;
 
-import ru.hardcoders.dns.transport.CompressedResponse;
-import ru.hardcoders.dns.transport.QueryMessage;
+import ru.hardcoders.dns.api.DNS;
+import ru.hardcoders.dns.impl.transport.QueryMessage;
 
 import java.io.Closeable;
 import java.net.DatagramPacket;
@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 public class DNSServerThread extends Thread implements Closeable {
 
     private static final int DNS_PORT = 53;
-    private static final int TTL_SECONDS = 5;
     private static final Logger logger = Logger.getLogger(DNSServerThread.class.getName());
 
     private volatile boolean closed = false;
@@ -26,16 +25,8 @@ public class DNSServerThread extends Thread implements Closeable {
     private final DNS dns;
     private final int port;
 
-    public DNSServerThread(String hostname, Registry registry) {
-        this(hostname, registry, new CompressedResponse.TimeToLive(TTL_SECONDS));
-    }
-
-    public DNSServerThread(String hostname, Registry registry, CompressedResponse.TimeToLive ttl) {
-        this(hostname, registry, ttl, DNS_PORT);
-    }
-
-    public DNSServerThread(String hostname, Registry registry, CompressedResponse.TimeToLive ttl, int port) {
-        this(new DNS(registry, ttl), hostname, port);
+    public DNSServerThread(DNS dns, String hostname) {
+        this(dns, hostname, DNS_PORT);
     }
 
     public DNSServerThread(DNS dns, String hostname, int port) {

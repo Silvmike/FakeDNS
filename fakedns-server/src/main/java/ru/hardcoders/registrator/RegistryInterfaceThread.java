@@ -1,6 +1,6 @@
 package ru.hardcoders.registrator;
 
-import ru.hardcoders.dns.Registry;
+import ru.hardcoders.dns.api.registry.Registry;
 
 import java.io.Closeable;
 import java.io.IOException;

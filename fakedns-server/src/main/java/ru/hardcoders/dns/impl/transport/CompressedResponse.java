@@ -1,4 +1,4 @@
-package ru.hardcoders.dns.transport;
+package ru.hardcoders.dns.impl.transport;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -6,18 +6,12 @@ import java.util.Arrays;
 /**
  * Created by silvmike on 30.06.16.
  */
-public class CompressedResponse {
+public record CompressedResponse(byte[] message) {
 
     private static final int DNS_HEADER_LENGTH = 12;
 
-    private final byte[] message;
-
     public CompressedResponse(QueryMessage message) {
         this(message.toBytes());
-    }
-
-    private CompressedResponse(byte[] message) {
-        this.message = message;
     }
 
     public CompressedResponse withHeader(Header dnsHeader) {
@@ -77,16 +71,10 @@ public class CompressedResponse {
         }
     }
 
-    public static class CompressedAnswer implements CharArraySerializable {
-
-        private final char[] answer;
+    public record CompressedAnswer(char[] answer) implements CharArraySerializable {
 
         public CompressedAnswer() {
             this(new char[0]);
-        }
-
-        private CompressedAnswer(char[] answer) {
-            this.answer = answer;
         }
 
         public CompressedAnswer withNamePointer(NamePointer namePointer) {
@@ -143,14 +131,13 @@ public class CompressedResponse {
 
     }
 
-    public static final class NamePointer implements CharArraySerializablePositionAware {
+    public record NamePointer(char[] pointer) implements CharArraySerializablePositionAware {
 
-        private final char[] pointer;
-
-        public NamePointer() {
-            this.pointer = new char[]{0xc000 + DNS_HEADER_LENGTH};
+        public static NamePointer create() {
+            return new NamePointer(new char[]{0xc000 + DNS_HEADER_LENGTH});
         }
 
+        @Override
         public char[] toChar() {
             char[] data = new char[this.pointer.length];
             System.arraycopy(this.pointer, 0, data, 0, data.length);
@@ -163,32 +150,47 @@ public class CompressedResponse {
         }
     }
 
-    public static final class InternetType extends Type {
+    public record InternetType(Type type) implements CharArraySerializablePositionAware {
 
         public InternetType() {
-            super(1);
+            this(new Type(1));
+        }
+
+        @Override
+        public char[] toChar() {
+            return type.toChar();
+        }
+
+        @Override
+        public int pos() {
+            return type.pos();
         }
     }
 
-    public static final class InternetClass extends AnswerClass {
+    public record InternetClass(AnswerClass answerClass) implements CharArraySerializablePositionAware {
 
         public InternetClass() {
-            super(1);
+            this(new AnswerClass(1));
+        }
+
+        @Override
+        public char[] toChar() {
+            return answerClass.toChar();
+        }
+
+        @Override
+        public int pos() {
+            return answerClass.pos();
         }
     }
 
-    public static class Type implements CharArraySerializablePositionAware {
-
-        private final char type;
+    public record Type(char type) implements CharArraySerializablePositionAware {
 
         public Type(int type) {
             this((char) type);
         }
 
-        public Type(char type) {
-            this.type = type;
-        }
-
+        @Override
         public char[] toChar() {
             return new char[]{this.type};
         }
@@ -199,18 +201,13 @@ public class CompressedResponse {
         }
     }
 
-    public static class AnswerClass implements CharArraySerializablePositionAware {
-
-        private final char answerClass;
+    public record AnswerClass(char answerClass) implements CharArraySerializablePositionAware {
 
         public AnswerClass(int answerClass) {
             this((char) answerClass);
         }
 
-        public AnswerClass(char answerClass) {
-            this.answerClass = answerClass;
-        }
-
+        @Override
         public char[] toChar() {
             return new char[]{this.answerClass};
         }
@@ -221,18 +218,13 @@ public class CompressedResponse {
         }
     }
 
-    public static class TimeToLive implements CharArraySerializablePositionAware {
-
-        private final int ttl;
-
-        public TimeToLive(int ttl) {
-            this.ttl = ttl;
-        }
+    public record TimeToLive(int ttl) implements CharArraySerializablePositionAware {
 
         public int seconds() {
             return this.ttl;
         }
 
+        @Override
         public char[] toChar() {
             char[] result = new char[2];
             result[0] = (char) ((ttl >> 16) & 0xffff);
@@ -255,17 +247,19 @@ public class CompressedResponse {
         }
     }
 
-    public static final class Data implements CharArraySerializablePositionAware {
-
-        private final char[] data;
+    public record Data(char[] data) implements CharArraySerializablePositionAware {
 
         public Data(InetAddress address) {
+            this(fromInetAddress(address));
+        }
+
+        private static char[] fromInetAddress(InetAddress address) {
             char[] data = new char[3];
             byte[] addr = address.getAddress();
             data[0] = 4;
             data[1] = (char) ((addr[0] << 8) | (addr[1] & 0xff));
             data[2] = (char) ((addr[2] << 8) | (addr[3] & 0xff));
-            this.data = data;
+            return data;
         }
 
         public char[] toChar() {

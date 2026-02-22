@@ -1,25 +1,19 @@
-package ru.hardcoders.dns.transport;
+package ru.hardcoders.dns.impl.transport;
 
 import java.util.Arrays;
 
 /**
  * Created by silvmike on 29.06.16.
  */
-public class Header {
-
-    private final char header[];
+public record Header(char[] header) {
 
     public Header(Header header) {
         this(header.toChar());
     }
 
-    private Header(char[] header) {
-        this.header = header;
-    }
-
     public Header withId(Id id) {
         char[] header = this.toChar();
-        header[0] = id.toChar();
+        header[0] = id.id();
         return new Header(header);
     }
 
@@ -70,16 +64,10 @@ public class Header {
         return result;
     }
 
-    public static final class Count {
-
-        private final char count;
+    public record Count(char count) {
 
         public Count(int count) {
             this((char) count);
-        }
-
-        public Count(char count) {
-            this.count = count;
         }
 
         public char toChar() {
@@ -88,30 +76,9 @@ public class Header {
 
     }
 
-    public static final class Id {
+    public record Id(char id) {}
 
-        private final char id;
-
-        public Id(char id) {
-            this.id = id;
-        }
-
-        public char toChar() {
-            return id;
-        }
-    }
-
-    public static final class FlagsAndCodes {
-
-        private final char flagsAndCodes;
-
-        public FlagsAndCodes() {
-            this((char) 0);
-        }
-
-        private FlagsAndCodes(char flagsAndCodes) {
-            this.flagsAndCodes = flagsAndCodes;
-        }
+    public record FlagsAndCodes(char flagsAndCodes) {
 
         public FlagsAndCodes withResponse() {
             return new FlagsAndCodes((char) (flagsAndCodes | (1 << 15)));
@@ -144,7 +111,7 @@ public class Header {
 
         public FlagsAndCodes withResponseCode(ResponseCode responseCode) {
             int mask = 0x0f;
-            return new FlagsAndCodes((char) ((flagsAndCodes | mask) ^ mask | responseCode.toByte()));
+            return new FlagsAndCodes((char) ((flagsAndCodes | mask) ^ mask | responseCode.responseCode));
         }
 
         public char toChar() {
@@ -153,33 +120,14 @@ public class Header {
 
     }
 
-    public static final class ResponseCode {
+    public record ResponseCode(byte responseCode) {}
 
-        private final byte responseCode;
-
-        public ResponseCode(int responseCode) {
-            this.responseCode = (byte) (responseCode & 0x0f);
+    public static Header bytesHeader(byte[] bytes) {
+        char[] result = new char[6];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = (char) (((bytes[2 * i] & 0xff) << 8) | (bytes[2 * i + 1] & 0xff));
         }
-
-        public byte toByte() {
-            return this.responseCode;
-        }
-    }
-
-    public static final class BytesHeader extends Header {
-
-        public BytesHeader(byte[] bytes) {
-            super(filled(bytes));
-        }
-
-        private static char[] filled(byte[] bytes) {
-            char[] result = new char[6];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = (char) (((bytes[2 * i] & 0xff) << 8) | (bytes[2 * i + 1] & 0xff));
-            }
-            return result;
-        }
-
+        return new Header(result);
     }
 
 }

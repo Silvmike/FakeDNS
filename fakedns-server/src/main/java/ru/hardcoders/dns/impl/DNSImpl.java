@@ -1,24 +1,32 @@
-package ru.hardcoders.dns;
+package ru.hardcoders.dns.impl;
 
-import ru.hardcoders.dns.transport.CompressedResponse;
-import ru.hardcoders.dns.transport.Header;
-import ru.hardcoders.dns.transport.QueryMessage;
+import ru.hardcoders.dns.api.DNS;
+import ru.hardcoders.dns.api.registry.Registry;
+import ru.hardcoders.dns.impl.transport.CompressedResponse;
+import ru.hardcoders.dns.impl.transport.Header;
+import ru.hardcoders.dns.impl.transport.QueryMessage;
 
 import java.net.InetAddress;
 
 /**
  * Created by silvmike on 30.06.16.
  */
-public class DNS {
+public class DNSImpl implements DNS {
 
     private final CompressedResponse.TimeToLive timeToLive;
     private final Registry registry;
 
-    public DNS(Registry registry, CompressedResponse.TimeToLive timeToLive) {
+    public DNSImpl(Registry registry, int timeToLive) {
+        this.registry = registry;
+        this.timeToLive = new CompressedResponse.TimeToLive(timeToLive);
+    }
+
+    public DNSImpl(Registry registry, CompressedResponse.TimeToLive timeToLive) {
         this.registry = registry;
         this.timeToLive = timeToLive;
     }
 
+    @Override
     public CompressedResponse response(QueryMessage message) {
 
         InetAddress address = registry.resolve(message.question());
@@ -38,10 +46,10 @@ public class DNS {
 
             CompressedResponse.CompressedAnswer answer = new CompressedResponse.CompressedAnswer();
             answer = answer.withData(new CompressedResponse.Data(address))
-                           .withNamePointer(new CompressedResponse.NamePointer())
+                           .withNamePointer(CompressedResponse.NamePointer.create())
                            .withTTL(timeToLive)
-                           .withClass(new CompressedResponse.InternetClass())
-                           .withType(new CompressedResponse.InternetType());
+                           .withClass(new CompressedResponse.InternetClass().answerClass())
+                           .withType(new CompressedResponse.InternetType().type());
 
             return new CompressedResponse(message).withHeader(responseHeader)
                                                   .withAnswer(answer);

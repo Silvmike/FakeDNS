@@ -1,4 +1,4 @@
-package ru.hardcoders.dns.transport;
+package ru.hardcoders.dns.impl.transport;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -7,18 +7,16 @@ import java.util.Arrays;
  * Created by silvmike on 30.06.16.
  * See <a href="https://justanapplication.wordpress.com/category/dns/dns-messages/dns-message-format/dns-message-header-format/">DNS Message Header Format</a>.
  */
-public class QueryMessage {
+public record QueryMessage(byte[] message) {
 
     private static final int DNS_HEADER_LENGTH = 12;
-
-    private final byte[] message;
 
     public QueryMessage(byte[] message) {
         this.message = Arrays.copyOf(message, message.length);
     }
 
     public Header header() {
-        return new Header.BytesHeader(Arrays.copyOf(this.message, DNS_HEADER_LENGTH));
+        return Header.bytesHeader(Arrays.copyOf(this.message, DNS_HEADER_LENGTH));
     }
 
     public String question() {

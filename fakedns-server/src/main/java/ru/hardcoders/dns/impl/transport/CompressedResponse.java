@@ -6,19 +6,19 @@ import java.util.Arrays;
 /**
  * Created by silvmike on 30.06.16.
  */
-public record CompressedResponse(byte[] message) {
+public record CompressedResponse(byte[] message, boolean found) {
 
     private static final int DNS_HEADER_LENGTH = 12;
 
-    public CompressedResponse(QueryMessage message) {
-        this(message.toBytes());
+    public CompressedResponse(QueryMessage message, boolean found) {
+        this(message.toBytes(), found);
     }
 
     public CompressedResponse withHeader(Header dnsHeader) {
         byte[] header = dnsHeader.toBytes();
         byte[] message = Arrays.copyOf(this.message, this.message.length);
         System.arraycopy(header, 0, message, 0, header.length);
-        return new CompressedResponse(message);
+        return new CompressedResponse(message, this.found);
     }
 
     public CompressedResponse withAnswer(CompressedAnswer compressedAnswer) {
@@ -26,13 +26,13 @@ public record CompressedResponse(byte[] message) {
         byte[] answer = compressedAnswer.toBytes();
         byte[] message = Arrays.copyOf(this.message, endOfMessage + answer.length + 1);
         System.arraycopy(answer, 0, message, endOfMessage + 1, answer.length);
-        return new CompressedResponse(message);
+        return new CompressedResponse(message, this.found);
     }
 
     public CompressedResponse withNoAnswer() {
         int endOfMessage = endOfQuestion() + 1;
         return new CompressedResponse(
-            Arrays.copyOf(this.message, endOfMessage)
+            Arrays.copyOf(this.message, endOfMessage), this.found
         );
     }
 

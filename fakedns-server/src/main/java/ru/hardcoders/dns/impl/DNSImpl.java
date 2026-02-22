@@ -51,8 +51,8 @@ public class DNSImpl implements DNS {
                            .withClass(new CompressedResponse.InternetClass().answerClass())
                            .withType(new CompressedResponse.InternetType().type());
 
-            return new CompressedResponse(message).withHeader(responseHeader)
-                                                  .withAnswer(answer);
+            return new CompressedResponse(message, true).withHeader(responseHeader)
+                                                              .withAnswer(answer);
 
         } else {
 
@@ -66,8 +66,8 @@ public class DNSImpl implements DNS {
                                            .withAuthorityRecordCount(new Header.Count(0))
                                            .withAdditionalRecordCount(new Header.Count(0));
 
-            return new CompressedResponse(message).withHeader(responseHeader)
-                                                  .withNoAnswer();
+            return new CompressedResponse(message, false).withHeader(responseHeader)
+                                                               .withNoAnswer();
 
         }
 

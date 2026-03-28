@@ -114,6 +114,7 @@ public record CompressedResponse(byte[] message, boolean found) {
             return answer;
         }
 
+        @Override
         public char[] toChar() {
             char[] result = new char[answer.length];
             System.arraycopy(answer, 0, result, 0, result.length);
@@ -133,8 +134,10 @@ public record CompressedResponse(byte[] message, boolean found) {
 
     public record NamePointer(char[] pointer) implements CharArraySerializablePositionAware {
 
+        private static final int DNS_COMPRESSION_POINTER = 0xC000;
+
         public static NamePointer create() {
-            return new NamePointer(new char[]{0xc000 + DNS_HEADER_LENGTH});
+            return new NamePointer(new char[]{ DNS_COMPRESSION_POINTER + DNS_HEADER_LENGTH });
         }
 
         @Override
@@ -262,12 +265,14 @@ public record CompressedResponse(byte[] message, boolean found) {
             return data;
         }
 
+        @Override
         public char[] toChar() {
             char[] data = new char[this.data.length];
             System.arraycopy(this.data, 0, data, 0, data.length);
             return data;
         }
 
+        @Override
         public int pos() {
             return 5;
         }

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RegistryImpl implements Registry {
 
-    private final Map<String, InetAddress> registry = new ConcurrentHashMap<String, InetAddress>();
+    private final Map<String, InetAddress> registry = new ConcurrentHashMap<>();
 
     public RegistryImpl() {}
 

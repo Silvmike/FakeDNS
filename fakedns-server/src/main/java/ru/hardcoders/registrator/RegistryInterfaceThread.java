@@ -11,7 +11,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,7 +87,6 @@ public class RegistryInterfaceThread extends Thread implements Closeable {
 
     private static final class Handler {
 
-        private static final Charset ASCII = Charset.forName("ASCII");
         private static final int FQDN_MAX_LENGTH = 255;
 
         private final ByteBuffer buffer = ByteBuffer.allocate(FQDN_MAX_LENGTH);
@@ -107,7 +106,7 @@ public class RegistryInterfaceThread extends Thread implements Closeable {
                         buffer.flip();
                         if (buffer.get(buffer.limit() - 1) == '\n') {
 
-                            String address = ASCII.decode(buffer).toString();
+                            String address = StandardCharsets.US_ASCII.decode(buffer).toString();
                             address = address.substring(0, address.indexOf('\n'));
                             if (!address.isEmpty() && address.charAt(address.length() - 1) == '\r') {
                                 address = address.substring(0, address.length() - 1);

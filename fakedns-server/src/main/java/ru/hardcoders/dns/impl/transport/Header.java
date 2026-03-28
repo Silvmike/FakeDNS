@@ -7,6 +7,11 @@ import java.util.Arrays;
  */
 public record Header(char[] header) {
 
+    private static final int BITS_PER_BYTE = 8;
+    private static final int BYTES_PER_CHAR = 2;
+    private static final int BYTE_MASK = 0xff;
+    private static final int HEADER_LENGTH = 6;
+
     public Header(Header header) {
         this(header.toChar());
     }
@@ -56,10 +61,10 @@ public record Header(char[] header) {
     }
 
     public byte[] toBytes() {
-        byte[] result = new byte[2 * header.length];
+        byte[] result = new byte[BYTES_PER_CHAR * header.length];
         for (int i = 0; i < header.length; i++) {
-            result[2 * i] = (byte) ((header[i] >> 8) & 0xff);
-            result[2 * i + 1] = (byte) (header[i] & 0xff);
+            result[BYTES_PER_CHAR * i] = (byte) ((header[i] >> BITS_PER_BYTE) & BYTE_MASK);
+            result[BYTES_PER_CHAR * i + 1] = (byte) (header[i] & BYTE_MASK);
         }
         return result;
     }
@@ -123,9 +128,10 @@ public record Header(char[] header) {
     public record ResponseCode(byte responseCode) {}
 
     public static Header bytesHeader(byte[] bytes) {
-        char[] result = new char[6];
+        char[] result = new char[HEADER_LENGTH];
         for (int i = 0; i < result.length; i++) {
-            result[i] = (char) (((bytes[2 * i] & 0xff) << 8) | (bytes[2 * i + 1] & 0xff));
+            result[i] = (char) (((bytes[BYTES_PER_CHAR * i] & BYTE_MASK) << 8)
+                               | (bytes[BYTES_PER_CHAR * i + 1] & BYTE_MASK));
         }
         return new Header(result);
     }

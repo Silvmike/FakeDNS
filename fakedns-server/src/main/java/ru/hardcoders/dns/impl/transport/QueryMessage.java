@@ -1,6 +1,6 @@
 package ru.hardcoders.dns.impl.transport;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -35,21 +35,31 @@ public record QueryMessage(byte[] message) {
 
     private String extractQuestion(int start, int end) {
         StringBuilder buffer = new StringBuilder(end - start);
-        try {
-            for (int i = start; i < (end - 1); ) {
-                char count = (char) message[i];
-                byte[] string = new byte[count];
-                for (char j = 0; j < count; j++) {
-                    string[j] = message[i + j + 1];
-                }
-                buffer.append(new String(string, "ASCII")).append('.');
-                i += (count + 1);
+        for (int i = start; i < (end - 1); ) {
+            int count = message[i] & 0xff;
+            assertLabelTooLong(count);
+            byte[] string = new byte[count];
+            for (char j = 0; j < count; j++) {
+                assertTruncatedLabel(i, count);
+                string[j] = message[i + j + 1];
             }
-            buffer.setLength(buffer.length() - 1);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            buffer.append(new String(string, StandardCharsets.US_ASCII)).append('.');
+            i += (count + 1);
         }
+        if (end != start) buffer.setLength(buffer.length() - 1);
         return buffer.toString();
+    }
+
+    private void assertTruncatedLabel(int i, int count) {
+        if (i + count + 1 > message.length) {
+            throw new IllegalArgumentException("Truncated label");
+        }
+    }
+
+    private static void assertLabelTooLong(int count) {
+        if (count > 63) {
+            throw new IllegalArgumentException("Label too long");
+        }
     }
 
     public byte[] toBytes() {
